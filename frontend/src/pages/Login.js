@@ -24,37 +24,43 @@ function Login() {
         e.preventDefault();
         const { email, password } = loginInfo;
         if (!email || !password) {
-            return handleError('email and password are required')
+            return handleError('Email and password are required.');
         }
         try {
             const url = `https://deploy-mern-app-tawny.vercel.app/auth/login`;
+            console.log('Sending login request to:', url);
+    
             const response = await fetch(url, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(loginInfo)
+                body: JSON.stringify({ email, password })
             });
+    
             const result = await response.json();
+            console.log('Login response:', result);
+    
             const { success, message, jwtToken, name, error } = result;
+    
             if (success) {
                 handleSuccess(message);
                 localStorage.setItem('token', jwtToken);
                 localStorage.setItem('loggedInUser', name);
                 setTimeout(() => {
-                    navigate('/home')
-                }, 1000)
+                    navigate('/home');
+                }, 1000);
             } else if (error) {
-                const details = error?.details[0].message;
-                handleError(details);
-            } else if (!success) {
+                handleError(error?.details?.[0]?.message || 'Unknown error occurred.');
+            } else {
                 handleError(message);
             }
-            console.log(result);
         } catch (err) {
-            handleError(err);
+            console.error('Login error:', err);
+            handleError('An unexpected error occurred. Please try again.');
         }
-    }
+    };
+    
 
     return (
         <div className='container'>
